@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Canal</title>
+  <link rel="stylesheet" href="../styles.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="../firebaseConfig.js"></script>
+</head>
+<body>
+  <h1 id="canalTitulo">Carregando canal...</h1>
+  <p id="canalDesc"></p>
+  <div id="videosCanal"></div>
+
+  <script>
+    const canalParam = window.location.search.replace("?","").split("=")[1];
+
+    firebase.database().ref("channels").once("value").then(snapshot => {
+      snapshot.forEach(child => {
+        const canal = child.val();
+        if (canal.name === canalParam) {
+          document.getElementById("canalTitulo").innerText = canal.name;
+          document.getElementById("canalDesc").innerText = canal.description;
+
+          firebase.database().ref("videos").orderByChild("userId").equalTo(child.key).on("value", snap => {
+            const container = document.getElementById("videosCanal");
+            container.innerHTML = "";
+            snap.forEach(v => {
+              const video = v.val();
+              const el = document.createElement("div");
+              el.className = "container";
+              el.innerHTML = `
+                <h3>${video.title}</h3>
+                <video controls src="${video.url}"></video>
+              `;
+              container.appendChild(el);
+            });
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
