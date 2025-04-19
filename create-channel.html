@@ -1,44 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Criar Canal</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  <script src="firebaseConfig.js"></script>
 </head>
 <body>
-  <h1>Criar seu Canal</h1>
-  <input type="text" id="canalNome" placeholder="Nome do canal">
-  <textarea id="canalDescricao" placeholder="Descrição do canal"></textarea>
-  <button onclick="criarCanal()">Criar Canal</button>
 
-  <script>
-    firebase.auth().onAuthStateChanged(user => {
-      if (!user) return window.location.href = "login.html";
+  <div class="container">
+    <h1>Criar Canal</h1>
+    <form id="channelForm">
+      <input type="text" id="channelName" placeholder="Nome do Canal" required>
+      <textarea id="channelDescription" placeholder="Descrição do Canal" required></textarea>
+      <button type="submit">Criar Canal</button>
+    </form>
+  </div>
 
-      firebase.database().ref('channels/' + user.uid).once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          const name = snapshot.val().name;
-          window.location.href = `/channels/ch.html=${name}`;
-        }
-      });
+  <!-- Firebase SDKs -->
+  <script type="module">
+    // Importar os módulos necessários
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+    import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCDkcb6Qf5gWANhViBd4ENhOW4ibYxOsKA",
+      authDomain: "kkrafale-lab.firebaseapp.com",
+      databaseURL: "https://kkrafale-lab-default-rtdb.firebaseio.com",
+      projectId: "kkrafale-lab",
+      storageBucket: "kkrafale-lab.firebasestorage.app",
+      messagingSenderId: "207958605538",
+      appId: "1:207958605538:web:9faa6916295617e1b228bb",
+      measurementId: "G-H0Q56BHFYJ"
+    };
+
+    // Inicializar o Firebase
+    const app = initializeApp(firebaseConfig);
+
+    // Obter instâncias de autenticação e banco de dados
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Função para criar o canal no Firebase
+    const createChannel = (channelName, channelDescription) => {
+      const user = auth.currentUser; // Obter o usuário logado
+
+      if (user) {
+        // Referência para o novo canal no Firebase
+        const channelRef = ref(db, 'channels/' + user.uid);
+
+        // Definir os dados do canal
+        set(channelRef, {
+          name: channelName,
+          description: channelDescription,
+          createdAt: Date.now()
+        }).then(() => {
+          alert("Canal criado com sucesso!");
+        }).catch((error) => {
+          alert("Erro ao criar canal: " + error.message);
+        });
+      } else {
+        alert("Você precisa estar logado para criar um canal.");
+      }
+    };
+
+    // Evento do formulário de criação de canal
+    document.getElementById('channelForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const channelName = document.getElementById('channelName').value;
+      const channelDescription = document.getElementById('channelDescription').value;
+
+      createChannel(channelName, channelDescription);
     });
-
-    function criarCanal() {
-      const user = firebase.auth().currentUser;
-      const nome = document.getElementById("canalNome").value;
-      const descricao = document.getElementById("canalDescricao").value;
-
-      firebase.database().ref('channels/' + user.uid).set({
-        name: nome,
-        description: descricao,
-        createdAt: Date.now()
-      }).then(() => {
-        window.location.href = `/channels/ch.html=${nome}`;
-      });
-    }
   </script>
+  
 </body>
 </html>
