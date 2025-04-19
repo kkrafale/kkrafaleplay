@@ -1,30 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>kkrPLAY</title>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+  <title>Feed</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="firebaseConfig.js"></script>
 </head>
 <body>
-  <h1>Vídeos</h1>
+  <h1>Feed de Vídeos</h1>
   <div id="feed"></div>
 
   <script>
     const feed = document.getElementById("feed");
 
-    db.ref("videos").on("value", snapshot => {
+    db.ref("videos").orderByChild("timestamp").on("value", snapshot => {
       feed.innerHTML = "";
       snapshot.forEach(child => {
-        const data = child.val();
-        const videoEl = document.createElement("div");
-        videoEl.innerHTML = `
-          <h3>${data.title}</h3>
-          <video width="320" controls src="${data.url}"></video>
-          <p><a href="channel.html?user=${data.userId}">Canal</a></p>
+        const video = child.val();
+        const el = document.createElement("div");
+        el.className = "container";
+        el.innerHTML = `
+          <h3>${video.title}</h3>
+          <video controls src="${video.url}"></video>
+          <p>Canal: <a style="color:#00e676" href="/channels/ch.html=${video.channelName}">${video.channelName}</a></p>
         `;
-        feed.appendChild(videoEl);
+        feed.prepend(el);
       });
     });
   </script>
