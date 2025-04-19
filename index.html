@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>kkrPLAY</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+  <script src="firebaseConfig.js"></script>
+</head>
+<body>
+  <h1>Vídeos</h1>
+  <div id="feed"></div>
+
+  <script>
+    const feed = document.getElementById("feed");
+
+    db.ref("videos").on("value", snapshot => {
+      feed.innerHTML = "";
+      snapshot.forEach(child => {
+        const data = child.val();
+        const videoEl = document.createElement("div");
+        videoEl.innerHTML = `
+          <h3>${data.title}</h3>
+          <video width="320" controls src="${data.url}"></video>
+          <p><a href="channel.html?user=${data.userId}">Canal</a></p>
+        `;
+        feed.appendChild(videoEl);
+      });
+    });
+  </script>
+</body>
+</html>
