@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Criar Canal</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="firebaseConfig.js"></script>
+</head>
+<body>
+  <h1>Criar seu Canal</h1>
+  <input type="text" id="canalNome" placeholder="Nome do canal">
+  <textarea id="canalDescricao" placeholder="Descrição do canal"></textarea>
+  <button onclick="criarCanal()">Criar Canal</button>
+
+  <script>
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) return window.location.href = "login.html";
+
+      firebase.database().ref('channels/' + user.uid).once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          const name = snapshot.val().name;
+          window.location.href = `/channels/ch.html=${name}`;
+        }
+      });
+    });
+
+    function criarCanal() {
+      const user = firebase.auth().currentUser;
+      const nome = document.getElementById("canalNome").value;
+      const descricao = document.getElementById("canalDescricao").value;
+
+      firebase.database().ref('channels/' + user.uid).set({
+        name: nome,
+        description: descricao,
+        createdAt: Date.now()
+      }).then(() => {
+        window.location.href = `/channels/ch.html=${nome}`;
+      });
+    }
+  </script>
+</body>
+</html>
